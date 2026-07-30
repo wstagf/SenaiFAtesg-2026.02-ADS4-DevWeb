@@ -18,3 +18,7 @@ https://www.w3schools.com/html/html_favicon.asp
 
 https://developer.mozilla.org/pt-BR/
 
+
+
+UTF8 x ASCII
+https://www.youtube.com/watch?v=TpoV_iVhFt0
