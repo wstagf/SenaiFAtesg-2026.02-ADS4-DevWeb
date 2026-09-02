@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área Restrita - Administrador do Portfólio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-light: #ecf0f1;
+            --bg-lighter: #f8f9fa;
+            --white: #ffffff;
+            --border-color: #bdc3c7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-lighter);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            gap: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+            color: var(--white);
+            padding: 1.5rem 0;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1.5rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu button {
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--secondary-color);
+        }
+
+        .sidebar-menu button.active {
+            background-color: var(--secondary-color);
+            border-left-color: var(--white);
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 0;
+            right: 0;
+            margin: 0 1.5rem;
+            padding: 0.75rem 1rem;
+            background-color: var(--accent-color);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem 2rem;
+            background-color: var(--bg-lighter);
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button.btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        button.btn-primary {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        button.btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        button.btn-success {
+            background-color: var(--success-color);
+            color: var(--white);
+        }
+
+        button.btn-success:hover {
+            background-color: #229954;
+        }
+
+        button.btn-danger {
+            background-color: var(--accent-color);
+            color: var(--white);
+        }
+
+        button.btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        button.btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .section {
+            display: none;
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .section h3 {
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--bg-light);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .item-card {
+            background-color: var(--bg-lighter);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .item-card:hover {
+            border-color: var(--secondary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .item-card p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .add-item-section {
+            background-color: var(--bg-light);
+            border: 2px dashed var(--secondary-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .add-item-section h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .add-item-section .form-row {
+            margin-bottom: 1.5rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background-color: #d5f4e6;
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .message.error {
+            background-color: #fadbd8;
+            color: var(--accent-color);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Skills display */
+        #programacao-lista,
+        #ferramentas-lista,
+        #habilidades-lista {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: var(--bg-lighter);
+            border-radius: 6px;
+            min-height: 40px;
+        }
+
+        #programacao-lista span,
+        #ferramentas-lista span,
+        #habilidades-lista span {
+            display: inline-block !important;
+            margin-right: 0.75rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .form-row {
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem 0;
+                margin-bottom: 1rem;
+            }
+
+            .sidebar-header {
+                padding: 0 1rem;
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                padding: 0 1rem;
+            }
+
+            .sidebar-menu button {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+                border: none;
+                border-radius: 4px;
+                background-color: rgba(255, 255, 255, 0.1);
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .sidebar-menu button:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-left: none;
+            }
+
+            .sidebar-menu button.active {
+                background-color: var(--secondary-color);
+                border-left: none;
+            }
+
+            .logout-btn {
+                position: relative;
+                bottom: auto;
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                gap: 0;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .section {
+                padding: 1.5rem 1rem;
+            }
+
+            .section h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Portfólio</h2>
+                <p>Gerencie seus dados</p>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li><button class="menu-btn active" data-section="dados-pessoais">📋 Dados Pessoais</button></li>
+                <li><button class="menu-btn" data-section="sobre">👤 Sobre Mim</button></li>
+                <li><button class="menu-btn" data-section="educacao">🎓 Educação</button></li>
+                <li><button class="menu-btn" data-section="conhecimentos">💻 Conhecimentos</button></li>
+                <li><button class="menu-btn" data-section="experiencias">💼 Experiências</button></li>
+                <li><button class="menu-btn" data-section="objetivo">🎯 Objetivo</button></li>
+                <li><button class="menu-btn" data-section="contatos">📞 Contatos</button></li>
+            </ul>
+
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <div class="header">
+                <h1>Administrador de Portfólio</h1>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="salvarDados()">💾 Salvar Dados</button>
+                    <button class="btn btn-primary" onclick="exportarJSON()">📥 Exportar JSON</button>
+                </div>
+            </div>
+
+            <div id="message" class="message"></div>
+
+            <!-- Seção: Dados Pessoais -->
+            <section id="dados-pessoais" class="section active">
+                <h2>Dados Pessoais</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nome">Nome Completo *</label>
+                        <input type="text" id="nome" placeholder="João Silva Santos" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="idade">Idade *</label>
+                        <input type="text" id="idade" placeholder="25" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="localizacao">Localização *</label>
+                        <input type="text" id="localizacao" placeholder="São Paulo - SP" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="titulo-profissional">Título Profissional *</label>
+                        <input type="text" id="titulo-profissional" placeholder="Estudante de Análise e Desenvolvimento de Sistemas" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefone">Telefone *</label>
+                        <input type="tel" id="telefone" placeholder="(11) 99999-9999" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-mail *</label>
+                        <input type="email" id="email" placeholder="joao.silva@email.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="monograma">Monograma (2 letras) *</label>
+                    <input type="text" id="monograma" placeholder="JS" maxlength="2" required>
+                </div>
+            </section>
+
+            <!-- Seção: Sobre Mim -->
+            <section id="sobre" class="section">
+                <h2>Sobre Mim</h2>
+
+                <div class="form-group">
+                    <label for="sobre-texto">Texto de Apresentação *</label>
+                    <textarea id="sobre-texto" placeholder="Descreva um pouco sobre você..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="sobre-objetivo">Objetivo (em itálico) *</label>
+                    <textarea id="sobre-objetivo" placeholder="Seu objetivo profissional..." required></textarea>
+                </div>
+            </section>
+
+            <!-- Seção: Educação -->
+            <section id="educacao" class="section">
+                <h2>Educação</h2>
+
+                <div id="educacao-lista"></div>
+
+                <div class="add-item-section">
+                    <h3>Adicionar Nova Formação</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edu-instituicao">Instituição *</label>
+                            <input type="text" id="edu-instituicao" placeholder="Nome da instituição">
+                        </div>
+                        <div class="form-group">
+                            <label for="edu-curso">Curso *</label>
+                            <input type="text" id="edu-curso" placeholder="Nome do curso">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edu-status">Status *</label>
+                            <select id="edu-status">
+                                <option value="">Selecione...</option>
+                                <option value="Cursando">Cursando</option>
+                                <option value="Concluído">Concluído</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edu-periodo">Período/Semestre *</label>
+                            <input type="text" id="edu-periodo" placeholder="4º Período">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="adicionarEducacao()">+ Adicionar Formação</button>
+                </div>
+            </section>
+
+            <!-- Seção: Conhecimentos -->
+            <section id="conhecimentos" class="section">
+                <h2>Conhecimentos e Habilidades</h2>
+
+                <h3 style="margin-top: 2rem; color: var(--secondary-color);">Programação</h3>
+                <div id="programacao-lista"></div>
+                <div class="form-group">
+                    <label for="prog-input">Adicionar Conhecimento</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="prog-input" placeholder="ex: Java, Python...">
+                        <button class="btn btn-primary btn-small" onclick="adicionarProgramacao()">+</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; color: var(--secondary-color);">Ferramentas</h3>
+                <div id="ferramentas-lista"></div>
+                <div class="form-group">
+                    <label for="ferr-input">Adicionar Ferramenta</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="ferr-input" placeholder="ex: Git, Docker...">
+                        <button class="btn btn-primary btn-small" onclick="adicionarFerramenta()">+</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; color: var(--secondary-color);">Habilidades Gerais</h3>
+                <div id="habilidades-lista"></div>
+                <div class="form-group">
+                    <label for="hab-input">Adicionar Habilidade</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="hab-input" placeholder="ex: Liderança, Comunicação...">
+                        <button class="btn btn-primary btn-small" onclick="adicionarHabilidade()">+</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção: Experiências -->
+            <section id="experiencias" class="section">
+                <h2>Experiência Profissional</h2>
+
+                <div id="experiencias-lista"></div>
+
+                <div class="add-item-section">
+                    <h3>Adicionar Nova Experiência</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="exp-cargo">Cargo *</label>
+                            <input type="text" id="exp-cargo" placeholder="Assistente Administrativo">
+                        </div>
+                        <div class="form-group">
+                            <label for="exp-empresa">Empresa *</label>
+                            <input type="text" id="exp-empresa" placeholder="Nome da Empresa">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="exp-inicio">Data de Início *</label>
+                            <input type="text" id="exp-inicio" placeholder="Jan 2022">
+                        </div>
+                        <div class="form-group">
+                            <label for="exp-fim">Data de Fim *</label>
+                            <input type="text" id="exp-fim" placeholder="Presente">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exp-descricao">Descrição das Atividades *</label>
+                        <textarea id="exp-descricao" placeholder="Descreva suas principais atividades..." style="min-height: 120px;"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="adicionarExperiencia()">+ Adicionar Experiência</button>
+                </div>
+            </section>
+
+            <!-- Seção: Objetivo -->
+            <section id="objetivo" class="section">
+                <h2>Objetivo Profissional</h2>
+
+                <div class="form-group">
+                    <label for="objetivo-texto">Descreva seu objetivo profissional *</label>
+                    <textarea id="objetivo-texto" placeholder="Busco oportunidade como..." required style="min-height: 150px;"></textarea>
+                </div>
+            </section>
+
+            <!-- Seção: Contatos -->
+            <section id="contatos" class="section">
+                <h2>Contatos e Redes Sociais</h2>
+
+                <div class="form-group">
+                    <label for="linkedin">LinkedIn URL</label>
+                    <input type="text" id="linkedin" placeholder="https://www.linkedin.com/in/seu-perfil/">
+                </div>
+
+                <div class="form-group">
+                    <label for="github">GitHub URL</label>
+                    <input type="text" id="github" placeholder="https://github.com/seu-usuario">
+                </div>
+
+                <div class="form-group">
+                    <label for="github-user">Usuário GitHub</label>
+                    <input type="text" id="github-user" placeholder="seu-usuario">
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        // Dados globais
+        let dadosPortfolio = {
+            pessoal: {},
+            sobre: {},
+            educacoes: [],
+            conhecimentos: { programacao: [], ferramentas: [], habilidades: [] },
+            experiencias: [],
+            objetivo: {},
+            contatos: {}
+        };
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarDados();
+            configurarMenuLateral();
+        });
+
+        // Configurar menu lateral
+        function configurarMenuLateral() {
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sectionId = btn.dataset.section;
+
+                    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    document.getElementById(sectionId).classList.add('active');
+
+                    // Carregar dados da seção
+                    carregarSecao(sectionId);
+                });
+            });
+        }
+
+        // Carregar dados do localStorage
+        function carregarDados() {
+            const dados = localStorage.getItem('portfolioDados');
+            if (dados) {
+                dadosPortfolio = JSON.parse(dados);
+                preencherFormularios();
+            }
+        }
+
+        // Preencher formulários com dados salvos
+        function preencherFormularios() {
+            // Dados Pessoais
+            document.getElementById('nome').value = dadosPortfolio.pessoal.nome || '';
+            document.getElementById('idade').value = dadosPortfolio.pessoal.idade || '';
+            document.getElementById('localizacao').value = dadosPortfolio.pessoal.localizacao || '';
+            document.getElementById('titulo-profissional').value = dadosPortfolio.pessoal.tituloProfissional || '';
+            document.getElementById('telefone').value = dadosPortfolio.pessoal.telefone || '';
+            document.getElementById('email').value = dadosPortfolio.pessoal.email || '';
+            document.getElementById('monograma').value = dadosPortfolio.pessoal.monograma || '';
+
+            // Sobre
+            document.getElementById('sobre-texto').value = dadosPortfolio.sobre.texto || '';
+            document.getElementById('sobre-objetivo').value = dadosPortfolio.sobre.objetivo || '';
+
+            // Objetivo
+            document.getElementById('objetivo-texto').value = dadosPortfolio.objetivo.texto || '';
+
+            // Contatos
+            document.getElementById('linkedin').value = dadosPortfolio.contatos.linkedin || '';
+            document.getElementById('github').value = dadosPortfolio.contatos.github || '';
+            document.getElementById('github-user').value = dadosPortfolio.contatos.githubUser || '';
+
+            // Recarregar listas
+            atualizarListas();
+        }
+
+        // Carregar seção
+        function carregarSecao(sectionId) {
+            if (sectionId === 'educacao') atualizarListaEducacao();
+            if (sectionId === 'conhecimentos') atualizarListaConhecimentos();
+            if (sectionId === 'experiencias') atualizarListaExperiencias();
+        }
+
+        // ===== EDUCAÇÃO =====
+        function adicionarEducacao() {
+            const instituicao = document.getElementById('edu-instituicao').value;
+            const curso = document.getElementById('edu-curso').value;
+            const status = document.getElementById('edu-status').value;
+            const periodo = document.getElementById('edu-periodo').value;
+
+            if (!instituicao || !curso || !status || !periodo) {
+                mostrarMensagem('Preecha todos os campos obrigatórios!', 'error');
+                return;
+            }
+
+            dadosPortfolio.educacoes.push({ instituicao, curso, status, periodo });
+
+            document.getElementById('edu-instituicao').value = '';
+            document.getElementById('edu-curso').value = '';
+            document.getElementById('edu-status').value = '';
+            document.getElementById('edu-periodo').value = '';
+
+            atualizarListaEducacao();
+            mostrarMensagem('Formação adicionada com sucesso!', 'success');
+        }
+
+        function atualizarListaEducacao() {
+            const lista = document.getElementById('educacao-lista');
+            lista.innerHTML = '';
+
+            dadosPortfolio.educacoes.forEach((edu, index) => {
+                lista.innerHTML += `
+                    <div class="item-card">
+                        <h4>${edu.curso}</h4>
+                        <p><strong>Instituição:</strong> ${edu.instituicao}</p>
+                        <p><strong>Status:</strong> ${edu.status} - ${edu.periodo}</p>
+                        <div class="item-actions">
+                            <button class="btn btn-danger btn-small" onclick="removerEducacao(${index})">✕ Remover</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function removerEducacao(index) {
+            dadosPortfolio.educacoes.splice(index, 1);
+            atualizarListaEducacao();
+            mostrarMensagem('Formação removida!', 'success');
+        }
+
+        // ===== CONHECIMENTOS =====
+        function adicionarProgramacao() {
+            const valor = document.getElementById('prog-input').value.trim();
+            if (valor && !dadosPortfolio.conhecimentos.programacao.includes(valor)) {
+                dadosPortfolio.conhecimentos.programacao.push(valor);
+                document.getElementById('prog-input').value = '';
+                atualizarListaConhecimentos();
+                mostrarMensagem('Conhecimento adicionado!', 'success');
+            }
+        }
+
+        function adicionarFerramenta() {
+            const valor = document.getElementById('ferr-input').value.trim();
+            if (valor && !dadosPortfolio.conhecimentos.ferramentas.includes(valor)) {
+                dadosPortfolio.conhecimentos.ferramentas.push(valor);
+                document.getElementById('ferr-input').value = '';
+                atualizarListaConhecimentos();
+                mostrarMensagem('Ferramenta adicionada!', 'success');
+            }
+        }
+
+        function adicionarHabilidade() {
+            const valor = document.getElementById('hab-input').value.trim();
+            if (valor && !dadosPortfolio.conhecimentos.habilidades.includes(valor)) {
+                dadosPortfolio.conhecimentos.habilidades.push(valor);
+                document.getElementById('hab-input').value = '';
+                atualizarListaConhecimentos();
+                mostrarMensagem('Habilidade adicionada!', 'success');
+            }
+        }
+
+        function atualizarListaConhecimentos() {
+            // Programação
+            let progHtml = '';
+            dadosPortfolio.conhecimentos.programacao.forEach((prog, index) => {
+                progHtml += `<span style="display: inline-block; background: var(--secondary-color); color: white; padding: 0.4rem 0.8rem; border-radius: 4px; margin-right: 0.5rem; margin-bottom: 0.5rem;">${prog} <button style="background: none; border: none; color: white; cursor: pointer; margin-left: 0.5rem;" onclick="removerProgramacao(${index})">✕</button></span>`;
+            });
+            document.getElementById('programacao-lista').innerHTML = progHtml || '<p style="color: var(--text-light);">Nenhum conhecimento adicionado</p>';
+
+            // Ferramentas
+            let ferrHtml = '';
+            dadosPortfolio.conhecimentos.ferramentas.forEach((ferr, index) => {
+                ferrHtml += `<span style="display: inline-block; background: var(--secondary-color); color: white; padding: 0.4rem 0.8rem; border-radius: 4px; margin-right: 0.5rem; margin-bottom: 0.5rem;">${ferr} <button style="background: none; border: none; color: white; cursor: pointer; margin-left: 0.5rem;" onclick="removerFerramenta(${index})">✕</button></span>`;
+            });
+            document.getElementById('ferramentas-lista').innerHTML = ferrHtml || '<p style="color: var(--text-light);">Nenhuma ferramenta adicionada</p>';
+
+            // Habilidades
+            let habHtml = '';
+            dadosPortfolio.conhecimentos.habilidades.forEach((hab, index) => {
+                habHtml += `<span style="display: inline-block; background: var(--secondary-color); color: white; padding: 0.4rem 0.8rem; border-radius: 4px; margin-right: 0.5rem; margin-bottom: 0.5rem;">${hab} <button style="background: none; border: none; color: white; cursor: pointer; margin-left: 0.5rem;" onclick="removerHabilidade(${index})">✕</button></span>`;
+            });
+            document.getElementById('habilidades-lista').innerHTML = habHtml || '<p style="color: var(--text-light);">Nenhuma habilidade adicionada</p>';
+        }
+
+        function removerProgramacao(index) {
+            dadosPortfolio.conhecimentos.programacao.splice(index, 1);
+            atualizarListaConhecimentos();
+        }
+
+        function removerFerramenta(index) {
+            dadosPortfolio.conhecimentos.ferramentas.splice(index, 1);
+            atualizarListaConhecimentos();
+        }
+
+        function removerHabilidade(index) {
+            dadosPortfolio.conhecimentos.habilidades.splice(index, 1);
+            atualizarListaConhecimentos();
+        }
+
+        // ===== EXPERIÊNCIAS =====
+        function adicionarExperiencia() {
+            const cargo = document.getElementById('exp-cargo').value;
+            const empresa = document.getElementById('exp-empresa').value;
+            const inicio = document.getElementById('exp-inicio').value;
+            const fim = document.getElementById('exp-fim').value;
+            const descricao = document.getElementById('exp-descricao').value;
+
+            if (!cargo || !empresa || !inicio || !fim || !descricao) {
+                mostrarMensagem('Preecha todos os campos obrigatórios!', 'error');
+                return;
+            }
+
+            dadosPortfolio.experiencias.push({ cargo, empresa, inicio, fim, descricao });
+
+            document.getElementById('exp-cargo').value = '';
+            document.getElementById('exp-empresa').value = '';
+            document.getElementById('exp-inicio').value = '';
+            document.getElementById('exp-fim').value = '';
+            document.getElementById('exp-descricao').value = '';
+
+            atualizarListaExperiencias();
+            mostrarMensagem('Experiência adicionada com sucesso!', 'success');
+        }
+
+        function atualizarListaExperiencias() {
+            const lista = document.getElementById('experiencias-lista');
+            lista.innerHTML = '';
+
+            dadosPortfolio.experiencias.forEach((exp, index) => {
+                lista.innerHTML += `
+                    <div class="item-card">
+                        <h4>${exp.cargo}</h4>
+                        <p><strong>Empresa:</strong> ${exp.empresa}</p>
+                        <p><strong>Período:</strong> ${exp.inicio} - ${exp.fim}</p>
+                        <p><strong>Atividades:</strong> ${exp.descricao}</p>
+                        <div class="item-actions">
+                            <button class="btn btn-danger btn-small" onclick="removerExperiencia(${index})">✕ Remover</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function removerExperiencia(index) {
+            dadosPortfolio.experiencias.splice(index, 1);
+            atualizarListaExperiencias();
+            mostrarMensagem('Experiência removida!', 'success');
+        }
+
+        // ===== SALVAR DADOS =====
+        function salvarDados() {
+            // Dados Pessoais
+            dadosPortfolio.pessoal = {
+                nome: document.getElementById('nome').value,
+                idade: document.getElementById('idade').value,
+                localizacao: document.getElementById('localizacao').value,
+                tituloProfissional: document.getElementById('titulo-profissional').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value,
+                monograma: document.getElementById('monograma').value
+            };
+
+            // Sobre
+            dadosPortfolio.sobre = {
+                texto: document.getElementById('sobre-texto').value,
+                objetivo: document.getElementById('sobre-objetivo').value
+            };
+
+            // Objetivo
+            dadosPortfolio.objetivo = {
+                texto: document.getElementById('objetivo-texto').value
+            };
+
+            // Contatos
+            dadosPortfolio.contatos = {
+                linkedin: document.getElementById('linkedin').value,
+                github: document.getElementById('github').value,
+                githubUser: document.getElementById('github-user').value
+            };
+
+            localStorage.setItem('portfolioDados', JSON.stringify(dadosPortfolio));
+            mostrarMensagem('✅ Dados salvos com sucesso!', 'success');
+        }
+
+        // ===== EXPORTAR JSON =====
+        function exportarJSON() {
+            salvarDados();
+            const dataStr = JSON.stringify(dadosPortfolio, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'portfolio_dados.json';
+            link.click();
+            mostrarMensagem('📥 Arquivo JSON exportado!', 'success');
+        }
+
+        // ===== MENSAGENS =====
+        function mostrarMensagem(texto, tipo) {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = texto;
+            msgEl.className = `message show ${tipo}`;
+            setTimeout(() => msgEl.classList.remove('show'), 3000);
+        }
+
+        // ===== LOGOUT =====
+        function logout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Carregar conhecimentos ao iniciar
+        atualizarListaConhecimentos();
+        atualizarListaEducacao();
+        atualizarListaExperiencias();
+    </script>
+
+</body>
+
+</html>

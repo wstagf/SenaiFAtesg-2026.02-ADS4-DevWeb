@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login - Sistema de Acesso</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --primary-color: #2c3e50;
+                --secondary-color: #3498db;
+                --accent-color: #e74c3c;
+                --text-dark: #2c3e50;
+                --text-light: #7f8c8d;
+                --bg-light: #ecf0f1;
+                --white: #ffffff;
+                --error-color: #e74c3c;
+                --success-color: #27ae60;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 1rem;
+            }
+
+            .login-container {
+                background-color: var(--white);
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+                width: 100%;
+                max-width: 420px;
+                padding: 3rem;
+            }
+
+            .login-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .login-header h1 {
+                font-size: 2rem;
+                color: var(--primary-color);
+                margin-bottom: 0.5rem;
+                font-weight: 700;
+            }
+
+            .login-header p {
+                color: var(--text-light);
+                font-size: 0.95rem;
+            }
+
+            .divider {
+                width: 50px;
+                height: 3px;
+                background-color: var(--secondary-color);
+                margin: 0 auto 2rem;
+                border-radius: 2px;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: var(--primary-color);
+                font-weight: 600;
+                font-size: 0.95rem;
+            }
+
+            .input-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+            .input-icon {
+                position: absolute;
+                left: 12px;
+                color: var(--secondary-color);
+                font-size: 1.2rem;
+            }
+
+            input[type="text"],
+            input[type="password"],
+            input[type="email"] {
+                width: 100%;
+                padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+                border: 2px solid var(--bg-light);
+                border-radius: 8px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                color: var(--text-dark);
+            }
+
+            input[type="text"]:focus,
+            input[type="password"]:focus,
+            input[type="email"]:focus {
+                outline: none;
+                border-color: var(--secondary-color);
+                background-color: #f8f9fa;
+                box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            }
+
+            input[type="text"]::placeholder,
+            input[type="password"]::placeholder,
+            input[type="email"]::placeholder {
+                color: var(--text-light);
+            }
+
+            .form-options {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .remember-me {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+                accent-color: var(--secondary-color);
+            }
+
+            .remember-me label {
+                margin: 0;
+                font-weight: 400;
+                color: var(--text-light);
+                cursor: pointer;
+            }
+
+            .forgot-password {
+                color: var(--secondary-color);
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            .forgot-password:hover {
+                color: var(--primary-color);
+                text-decoration: underline;
+            }
+
+            .login-button {
+                width: 100%;
+                padding: 0.9rem;
+                background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+                color: var(--white);
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-bottom: 1rem;
+            }
+
+            .login-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+            }
+
+            .login-button:active {
+                transform: translateY(0);
+            }
+
+            .signup-link {
+                text-align: center;
+                color: var(--text-light);
+                font-size: 0.9rem;
+            }
+
+            .signup-link a {
+                color: var(--secondary-color);
+                text-decoration: none;
+                font-weight: 600;
+                transition: color 0.3s ease;
+            }
+
+            .signup-link a:hover {
+                color: var(--primary-color);
+                text-decoration: underline;
+            }
+
+            .error-message {
+                display: none;
+                background-color: #fadbd8;
+                color: var(--error-color);
+                padding: 0.8rem;
+                border-radius: 6px;
+                margin-bottom: 1.5rem;
+                border-left: 4px solid var(--error-color);
+                font-size: 0.9rem;
+            }
+
+            .error-message.show {
+                display: block;
+            }
+
+            .success-message {
+                display: none;
+                background-color: #d5f4e6;
+                color: var(--success-color);
+                padding: 0.8rem;
+                border-radius: 6px;
+                margin-bottom: 1.5rem;
+                border-left: 4px solid var(--success-color);
+                font-size: 0.9rem;
+            }
+
+            .success-message.show {
+                display: block;
+            }
+
+            .toggle-password {
+                position: absolute;
+                right: 12px;
+                background: none;
+                border: none;
+                color: var(--text-light);
+                cursor: pointer;
+                font-size: 1.2rem;
+                padding: 0.25rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .toggle-password:hover {
+                color: var(--secondary-color);
+            }
+
+            @media (max-width: 480px) {
+                .login-container {
+                    padding: 2rem 1.5rem;
+                    border-radius: 8px;
+                }
+
+                .login-header h1 {
+                    font-size: 1.5rem;
+                }
+
+                input[type="text"],
+                input[type="password"],
+                input[type="email"] {
+                    padding: 0.7rem 0.7rem 0.7rem 2.2rem;
+                    font-size: 16px;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="login-container">
+
+            <div class="login-header">
+                <h1>Login</h1>
+                <p>Acesse sua conta</p>
+                <div class="divider"></div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label for="usuario">Usuário ou E-mail</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input
+                            type="text"
+                            id="usuario"
+                            name="usuario"
+                            placeholder="Digite seu usuário ou e-mail"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔐</span>
+                        <input
+                            type="password"
+                            id="senha"
+                            name="senha"
+                            placeholder="Digite sua senha"
+                            required
+                        >
+                        <button type="button" class="toggle-password" id="togglePassword">👁️</button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="lembrar" name="lembrar">
+                        <label for="lembrar">Lembrar-me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                </div>
+
+                <div  class="login-button" onclick="login()">Entrar</div>
+
+            </form>
+
+            <div class="signup-link">
+                Não possui conta? <a href="#">Cadastre-se aqui</a>
+            </div>
+
+        </div>
+
+        <script>
+            const login = () => {
+        
+            const usuario = 
+            document.getElementById("usuario").value;
+            const senha = 
+            document.getElementById("senha").value;
+
+            if((usuario == "") || (senha == "")) {
+                alert("Digite os dados")
+            } else {
+                if( senha === "1") {
+                    alert("Vamos entrar")
+                    salvarDados()
+                    document.location.href = "./arearestrita.html";
+                } else {
+                    alert('Dados Errados')
+                }
+            }
+        }
+
+            // // Arrow function 
+            // const/let  nome =(listaDePArametros) => { 
+            //     // digite o seu codigo qui
+            // }
+
+
+        const salvarDados = () => {
+            nomeUsuario = document.getElementById("usuario").value
+            localStorage.setItem("usuario", nomeUsuario)
+        }
+        </script>
+
+    </body>
+
+</html>

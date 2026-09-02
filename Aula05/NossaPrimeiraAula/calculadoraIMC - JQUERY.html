@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de IMC</title>
+</head>
+
+<body>
+
+```
+<h1>Calculadora de IMC</h1>
+
+<label>
+    Peso (kg):
+</label>
+
+<input type="number" id="peso">
+
+<br><br>
+
+<label>
+    Altura (m):
+</label>
+
+<input type="number" id="altura" step="0.01">
+
+<br><br>
+
+<button id="calcular">
+    Calcular IMC
+</button>
+
+<h2 id="resultado"></h2>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+
+    $("#calcular").click(function () {
+
+        const peso = Number($("#peso").val());
+        
+        
+        const altura = Number($("#altura").val());
+
+        const imc = peso / (altura * altura);
+
+        let mensagem = "";
+
+        if (imc < 18.5) {
+
+            mensagem = "Abaixo do peso";
+
+        } else if (imc < 25) {
+
+            mensagem = "Peso normal";
+
+        } else if (imc < 30) {
+
+            mensagem = "Sobrepeso";
+
+        } else {
+
+            mensagem = "Obesidade";
+
+        }
+
+        $("#resultado").text(
+            "IMC: " + imc.toFixed(2) + " - " + mensagem
+        );
+
+    });
+
+</script>
+```
+
+</body>
+</html>

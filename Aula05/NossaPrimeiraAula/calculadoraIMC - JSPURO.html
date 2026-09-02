@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de IMC</title>
+</head>
+<body>
+
+```
+<h1>Calculadora de IMC</h1>
+
+<label>
+    Peso (kg):
+</label>
+
+<input
+    type="number"
+    id="peso"
+>
+
+<br><br>
+
+<label>
+    Altura (m):
+</label>
+
+<input
+    type="number"
+    id="altura"
+    step="0.01"
+>
+
+<br><br>
+
+<button onclick="calcularIMC()">
+    Calcular IMC
+</button>
+
+<h2 id="resultado"></h2>
+
+<script>
+
+    function calcularIMC() {
+
+        const peso = Number(
+            document.getElementById("peso").value
+        );
+
+        const altura = Number(
+            document.getElementById("altura").value
+        );
+
+        const imc = peso / (altura * altura);
+
+        const resultado = document.getElementById("resultado");
+
+        if (imc < 18.5) {
+
+            resultado.innerText =
+                "IMC: " + imc.toFixed(2) +
+                " - Abaixo do peso";
+
+        } else if (imc < 25) {
+
+            resultado.innerText =
+                "IMC: " + imc.toFixed(2) +
+                " - Peso normal";
+
+        } else if (imc < 30) {
+
+            resultado.innerText =
+                "IMC: " + imc.toFixed(2) +
+                " - Sobrepeso";
+
+        } else {
+
+            resultado.innerText =
+                "IMC: " + imc.toFixed(2) +
+                " - Obesidade";
+
+        }
+    }
+
+</script>
+```
+
+</body>
+</html>

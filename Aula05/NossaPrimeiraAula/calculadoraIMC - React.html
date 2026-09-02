@@ -1,0 +1,69 @@
+import { useState } from "react";
+
+function App() {
+const [peso, setPeso] = useState("");
+const [altura, setAltura] = useState("");
+const [resultado, setResultado] = useState("");
+
+function calcularIMC() {
+    const imc = Number(peso) / (Number(altura) * Number(altura));
+
+    let mensagem = "";
+
+    if (imc < 18.5) {
+        mensagem = "Abaixo do peso";
+    } else if (imc < 25) {
+        mensagem = "Peso normal";
+    } else if (imc < 30) {
+        mensagem = "Sobrepeso";
+    } else {
+        mensagem = "Obesidade";
+    }
+
+    setResultado(
+        `IMC: ${imc.toFixed(2)} - ${mensagem}`
+    );
+}
+
+return (
+    <>
+        <h1>Calculadora de IMC</h1>
+
+        <label>
+            Peso (kg):
+        </label>
+
+        <input
+            type="number"
+            value={peso}
+            onChange={(event) => setPeso(event.target.value)}
+        />
+
+        <br />
+        <br />
+
+        <label>
+            Altura (m):
+        </label>
+
+        <input
+            type="number"
+            step="0.01"
+            value={altura}
+            onChange={(event) => setAltura(event.target.value)}
+        />
+
+        <br />
+        <br />
+
+        <button onClick={calcularIMC}>
+            Calcular IMC
+        </button>
+
+        <h2>{resultado}</h2>
+    </>
+);
+
+}
+
+export default App;

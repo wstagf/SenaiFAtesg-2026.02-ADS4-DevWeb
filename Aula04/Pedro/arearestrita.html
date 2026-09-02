@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        Seja bem vindo 
+        <span id="labelLogin">XXX</span>
+    </div>
+
+    <form>
+        <label for="nome">Nome</label>
+        <input id="nome" type="text"
+            placeholder="Digite o seu nome"/>
+        <br>
+        <label for="nomeCompleto">Nome completo</label>
+        <input id="nomeCompleto" type="text"
+            placeholder="Digite o seu nome completo"/>
+        <br>
+        <label for="bio">BIO</label>
+        <input id="bio" type="text"
+            placeholder="Digite uma biografia"/>
+        <br>
+
+        <label for="idade">Idade</label>
+        <input id="idade" type="text"
+            placeholder="Digite sua idade"/>
+        <br>
+
+        <label for="cidade">Cidade</label>
+        <input id="cidade" type="text"
+            placeholder="Digite a sua cidade"/>
+        <br>
+
+        <label for="telefone">Telefone</label>
+        <input id="telefone" type="text"
+            placeholder="Digite seu telefone"/>
+        <br>
+
+        <label for="email">Email</label>
+        <input id="email" type="text"
+            placeholder="Digite uma biografia"/>
+        <br>
+
+        <span onClick="salvarDados()">Salvar</span>
+    </form>
+
+    <span onClick="carregarDados()">Carregar</span>
+    <script>
+        let portifolio = {};
+        const salvarDados = () => {
+            portifolio.nome = document.getElementById("nome").value;
+            portifolio.nomeCompleto = document.getElementById("nomeCompleto").value;
+            portifolio.bio = document.getElementById("bio").value;
+
+            portifolio.idade = document.getElementById("idade").value;
+            portifolio.cidade = document.getElementById("cidade").value;
+            portifolio.telefone = document.getElementById("telefone").value;
+            portifolio.email = document.getElementById("email").value; 
+
+
+            const objetoConvertido = JSON.stringify(portifolio);
+            localStorage.setItem("portifolio", objetoConvertido )
+ 
+        }
+        const carregarDados = () => {
+            document.getElementById("labelLogin").innerText 
+                        = localStorage.getItem("usuario")
+
+             const objetoLido = JSON.parse(localStorage.getItem("portifolio")); 
+
+
+            document.getElementById("nome").value = objetoLido.nome;
+            document.getElementById("nomeCompleto").value = objetoLido.nomeCompleto;
+            document.getElementById("bio").value = objetoLido.bio;   
+        }
+        window.onload = function () {
+            carregarDados();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+</head>
+<body>
+    <div>
+        <label>Número 1</label>
+        <input id="numero1" type="number" />
+        <br>
+        <label>Número 2</label>
+        <input id="numero2" type="number" />
+        <br>
+        <button onclick="somar()">+</button>
+        <button onclick="subtrair()">-</button>
+        <button onclick="multiplicar()">*</button>
+        <button onclick="dividir()">/</button>
+
+        <p>Resultado: <span id="destino">0</span></p>
+    </div>
+    <script>
+        var pegarValores = function() {
+            var numero1 = document.getElementById("numero1").value
+            var numero2 = document.getElementById("numero2").value
+
+            return [Number(numero1), Number(numero2)]
+        }
+
+        var mostrarResultado = function(valor) {
+            var destino = document.getElementById("destino")
+            destino.innerText = valor
+        }
+
+        var somar = function() {
+            console.log("Cliquei em somar")
+            var valores = pegarValores()
+            var resultado = valores[0] + valores[1]
+            mostrarResultado(resultado)
+        }
+
+        var subtrair = function() {
+            console.log("Cliquei em subtrair")
+            var valores = pegarValores()
+            var resultado = valores[0] - valores[1]
+            mostrarResultado(resultado)
+        }
+
+        var multiplicar = function() {
+            console.log("Cliquei em multiplicar")
+            var valores = pegarValores()
+            var resultado = valores[0] * valores[1]
+            mostrarResultado(resultado)
+        }
+
+        var dividir = function() {
+            console.log("Cliquei em dividir")
+            var valores = pegarValores()
+
+            if (valores[1] == 0) {
+                mostrarResultado("Não é possível dividir por zero")
+                return
+            }
+
+            var resultado = valores[0] / valores[1]
+            mostrarResultado(resultado)
+        }
+    </script>
+</body>
+</html>
