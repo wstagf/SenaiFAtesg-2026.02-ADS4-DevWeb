@@ -1,0 +1,587 @@
+
+// Middleware de autenticação JWT
+function autenticar(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1]; // "Bearer token"
+
+  if (!token) {
+    return res.status(401).json({
+      mensagem: 'Token não fornecido',
+      sucesso: false
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.usuario = decoded; // Armazena dados do usuário no request
+    next();
+  } catch (erro) {
+    res.status(401).json({
+      mensagem: 'Token inválido ou expirado',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+}
+
+// ========================================
+// BASE DE DADOS EM MEMÓRIA
+// ========================================
+
+// Array de usuários (em produção, usar banco de dados real)
+let usuarios = [
+  {
+    id: 1,
+    nome: 'Admin',
+    email: 'admin@email.com',
+    senha: await bcrypt.hash('admin123', 10),
+    dataCriacao: new Date()
+  }
+];
+
+// Array de produtos (CRUD)
+let produtos = [
+  {
+    id: 1,
+    nome: 'Notebook Dell',
+    preco: 3500.00,
+    categoria: 'Eletrônicos',
+    estoque: 5,
+    descricao: 'Notebook de alta performance',
+    criadorId: 1,
+    dataCriacao: new Date()
+  },
+  {
+    id: 2,
+    nome: 'Mouse Logitech',
+    preco: 85.00,
+    categoria: 'Periféricos',
+    estoque: 20,
+    descricao: 'Mouse sem fio',
+    criadorId: 1,
+    dataCriacao: new Date()
+  }
+];
+
+// Contadores de ID
+let proximoUsuarioId = 2;
+let proximoProdutoId = 3;
+
+// ========================================
+// ROTAS DE AUTENTICAÇÃO
+// ========================================
+
+/**
+ * POST /auth/register
+ * Registrar novo usuário
+ */
+app.post('/auth/register', async (req, res) => {
+  try {
+    const { nome, email, senha } = req.body;
+
+    // Validações
+    if (!nome || !email || !senha) {
+      return res.status(400).json({
+        mensagem: 'Nome, email e senha são obrigatórios',
+        sucesso: false
+      });
+    }
+
+    // Verificar se email já existe
+    const usuarioExistente = usuarios.find(u => u.email === email);
+    if (usuarioExistente) {
+      return res.status(400).json({
+        mensagem: 'Email já cadastrado',
+        sucesso: false
+      });
+    }
+
+    // Hash da senha
+    const senhaHash = await bcrypt.hash(senha, 10);
+
+    // Criar novo usuário
+    const novoUsuario = {
+      id: proximoUsuarioId++,
+      nome,
+      email,
+      senha: senhaHash,
+      dataCriacao: new Date()
+    };
+
+    usuarios.push(novoUsuario);
+
+    // Gerar token JWT
+    const token = jwt.sign(
+      { id: novoUsuario.id, email: novoUsuario.email, nome: novoUsuario.nome },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRE }
+    );
+
+    res.status(201).json({
+      mensagem: 'Usuário registrado com sucesso',
+      sucesso: true,
+      dados: {
+        id: novoUsuario.id,
+        nome: novoUsuario.nome,
+        email: novoUsuario.email
+      },
+      token
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao registrar usuário',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+/**
+ * POST /auth/login
+ * Fazer login com email e senha
+ */
+app.post('/auth/login', async (req, res) => {
+  try {
+    const { email, senha } = req.body;
+
+    // Validações
+    if (!email || !senha) {
+      return res.status(400).json({
+        mensagem: 'Email e senha são obrigatórios',
+        sucesso: false
+      });
+    }
+
+    // Buscar usuário
+    const usuario = usuarios.find(u => u.email === email);
+    if (!usuario) {
+      return res.status(401).json({
+        mensagem: 'Email ou senha incorretos',
+        sucesso: false
+      });
+    }
+
+    // Verificar senha
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaValida) {
+      return res.status(401).json({
+        mensagem: 'Email ou senha incorretos',
+        sucesso: false
+      });
+    }
+
+    // Gerar token JWT
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email, nome: usuario.nome },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRE }
+    );
+
+    res.json({
+      mensagem: 'Login realizado com sucesso',
+      sucesso: true,
+      dados: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email
+      },
+      token
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao fazer login',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+/**
+ * GET /auth/me
+ * Obter dados do usuário autenticado
+ */
+app.get('/auth/me', autenticar, (req, res) => {
+  const usuario = usuarios.find(u => u.id === req.usuario.id);
+
+  if (!usuario) {
+    return res.status(404).json({
+      mensagem: 'Usuário não encontrado',
+      sucesso: false
+    });
+  }
+
+  res.json({
+    mensagem: 'Dados do usuário',
+    sucesso: true,
+    dados: {
+      id: usuario.id,
+      nome: usuario.nome,
+      email: usuario.email,
+      dataCriacao: usuario.dataCriacao
+    }
+  });
+});
+
+// ========================================
+// ROTAS CRUD - PRODUTOS
+// ========================================
+
+/**
+ * GET /produtos
+ * Listar todos os produtos
+ */
+app.get('/produtos', (req, res) => {
+  try {
+    // Paginação opcional
+    const pagina = parseInt(req.query.pagina) || 1;
+    const limite = parseInt(req.query.limite) || 10;
+
+    const inicio = (pagina - 1) * limite;
+    const fim = inicio + limite;
+
+    const total = produtos.length;
+    const dados = produtos.slice(inicio, fim);
+
+    res.json({
+      mensagem: 'Produtos listados',
+      sucesso: true,
+      dados,
+      paginacao: {
+        pagina,
+        limite,
+        total,
+        paginas: Math.ceil(total / limite)
+      }
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao listar produtos',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+/**
+ * GET /produtos/:id
+ * Obter um produto por ID
+ */
+app.get('/produtos/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const produto = produtos.find(p => p.id === id);
+
+    if (!produto) {
+      return res.status(404).json({
+        mensagem: 'Produto não encontrado',
+        sucesso: false
+      });
+    }
+
+    res.json({
+      mensagem: 'Produto encontrado',
+      sucesso: true,
+      dados: produto
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao buscar produto',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+/**
+ * POST /produtos
+ * Criar novo produto (requer autenticação)
+ */
+app.post('/produtos', autenticar, (req, res) => {
+  try {
+    const { nome, preco, categoria, estoque, descricao } = req.body;
+
+    // Validações
+    if (!nome || !preco || !categoria) {
+      return res.status(400).json({
+        mensagem: 'Nome, preço e categoria são obrigatórios',
+        sucesso: false
+      });
+    }
+
+    // Validar tipos de dados
+    if (typeof preco !== 'number' || preco < 0) {
+      return res.status(400).json({
+        mensagem: 'Preço deve ser um número positivo',
+        sucesso: false
+      });
+    }
+
+    const novoProduto = {
+      id: proximoProdutoId++,
+      nome,
+      preco,
+      categoria,
+      estoque: estoque || 0,
+      descricao: descricao || '',
+      criadorId: req.usuario.id,
+      dataCriacao: new Date()
+    };
+
+    produtos.push(novoProduto);
+
+    res.status(201).json({
+      mensagem: 'Produto criado com sucesso',
+      sucesso: true,
+      dados: novoProduto
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao criar produto',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+/**
+ * PUT /produtos/:id
+ * Atualizar um produto (requer autenticação)
+ */
+app.put('/produtos/:id', autenticar, (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const produto = produtos.find(p => p.id === id);
+
+    if (!produto) {
+      return res.status(404).json({
+        mensagem: 'Produto não encontrado',
+        sucesso: false
+      });
+    }
+
+    // Verificar permissão (só o criador pode editar)
+    if (produto.criadorId !== req.usuario.id) {
+      return res.status(403).json({
+        mensagem: 'Você não tem permissão para editar este produto',
+        sucesso: false
+      });
+    }
+
+    // Atualizar campos fornecidos
+    const { nome, preco, categoria, estoque, descricao } = req.body;
+
+    if (nome) produto.nome = nome;
+    if (preco !== undefined) produto.preco = preco;
+    if (categoria) produto.categoria = categoria;
+    if (estoque !== undefined) produto.estoque = estoque;
+    if (descricao !== undefined) produto.descricao = descricao;
+
+    res.json({
+      mensagem: 'Produto atualizado com sucesso',
+      sucesso: true,
+      dados: produto
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao atualizar produto',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+/**
+ * DELETE /produtos/:id
+ * Deletar um produto (requer autenticação)
+ */
+app.delete('/produtos/:id', autenticar, (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const indice = produtos.findIndex(p => p.id === id);
+
+    if (indice === -1) {
+      return res.status(404).json({
+        mensagem: 'Produto não encontrado',
+        sucesso: false
+      });
+    }
+
+    const produto = produtos[indice];
+
+    // Verificar permissão (só o criador pode deletar)
+    if (produto.criadorId !== req.usuario.id) {
+      return res.status(403).json({
+        mensagem: 'Você não tem permissão para deletar este produto',
+        sucesso: false
+      });
+    }
+
+    const produtoDeletado = produtos.splice(indice, 1)[0];
+
+    res.json({
+      mensagem: 'Produto deletado com sucesso',
+      sucesso: true,
+      dados: produtoDeletado
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao deletar produto',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+/**
+ * GET /produtos/categoria/:categoria
+ * Filtrar produtos por categoria
+ */
+app.get('/produtos/categoria/:categoria', (req, res) => {
+  try {
+    const categoria = req.params.categoria;
+    const resultado = produtos.filter(p =>
+      p.categoria.toLowerCase() === categoria.toLowerCase()
+    );
+
+    res.json({
+      mensagem: `Produtos da categoria "${categoria}"`,
+      sucesso: true,
+      dados: resultado,
+      total: resultado.length
+    });
+
+  } catch (erro) {
+    res.status(500).json({
+      mensagem: 'Erro ao filtrar produtos',
+      sucesso: false,
+      erro: erro.message
+    });
+  }
+});
+
+// ========================================
+// ROTAS DE ERRO
+// ========================================
+
+/**
+ * 404 - Rota não encontrada
+ */
+app.use((req, res) => {
+  res.status(404).json({
+    mensagem: 'Rota não encontrada',
+    sucesso: false,
+    caminho: req.path,
+    metodo: req.method
+  });
+});
+
+// ========================================
+// INICIAR SERVIDOR
+// ========================================
+
+app.listen(PORT, () => {
+  console.log(`
+  ╔════════════════════════════════════════╗
+  ║  🚀 Backend Node.js com JWT            ║
+  ║  Servidor rodando em PORT: ${PORT}      ║
+  ║  http://localhost:${PORT}               ║
+  ║                                        ║
+  ║  📝 Documentação: /docs                ║
+  ║  🔐 JWT Secret configurado             ║
+  ╚════════════════════════════════════════╝
+  `);
+});
+
+// ========================================
+// ROTA DE DOCUMENTAÇÃO
+// ========================================
+
+app.get('/docs', (req, res) => {
+  res.json({
+    titulo: 'API CRUD com JWT - Documentação',
+    versao: '1.0.0',
+    baseUrl: `http://localhost:${PORT}`,
+    autenticacao: {
+      tipo: 'JWT',
+      formato: 'Authorization: Bearer <token>',
+      localizacao: 'Header'
+    },
+    endpoints: {
+      autenticacao: [
+        {
+          metodo: 'POST',
+          rota: '/auth/register',
+          descricao: 'Registrar novo usuário',
+          autenticado: false,
+          corpo: { nome: 'string', email: 'string', senha: 'string' }
+        },
+        {
+          metodo: 'POST',
+          rota: '/auth/login',
+          descricao: 'Fazer login',
+          autenticado: false,
+          corpo: { email: 'string', senha: 'string' }
+        },
+        {
+          metodo: 'GET',
+          rota: '/auth/me',
+          descricao: 'Obter dados do usuário autenticado',
+          autenticado: true
+        }
+      ],
+      produtos: [
+        {
+          metodo: 'GET',
+          rota: '/produtos',
+          descricao: 'Listar todos os produtos',
+          autenticado: false,
+          query: { pagina: 'number', limite: 'number' }
+        },
+        {
+          metodo: 'GET',
+          rota: '/produtos/:id',
+          descricao: 'Obter um produto por ID',
+          autenticado: false
+        },
+        {
+          metodo: 'POST',
+          rota: '/produtos',
+          descricao: 'Criar novo produto',
+          autenticado: true,
+          corpo: { nome: 'string', preco: 'number', categoria: 'string', estoque: 'number', descricao: 'string' }
+        },
+        {
+          metodo: 'PUT',
+          rota: '/produtos/:id',
+          descricao: 'Atualizar um produto',
+          autenticado: true,
+          corpo: { nome: '?string', preco: '?number', categoria: '?string', estoque: '?number', descricao: '?string' }
+        },
+        {
+          metodo: 'DELETE',
+          rota: '/produtos/:id',
+          descricao: 'Deletar um produto',
+          autenticado: true
+        },
+        {
+          metodo: 'GET',
+          rota: '/produtos/categoria/:categoria',
+          descricao: 'Filtrar produtos por categoria',
+          autenticado: false
+        }
+      ]
+    },
+    usuariosTeste: [
+      {
+        email: 'admin@email.com',
+        senha: 'admin123'
+      }
+    ]
+  });
+});

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>Selecione um pais para ver os feriados</p>
+    <form>
+        <select id="seletor" onchange="selecionarPais()">
+        </select>
+
+        <span onclick="carregarListaPaises()">carregarPais</span> 
+
+
+        <hr>
+        <div id="dadosFeriadoPais" style="display: none;">
+            <h1>Pais</h1>
+            <p>Code: <span id="code"></span></p>
+            <p>Ano: <span id="year"></span></p>
+            <p>Quantidade de Feriados: <span id="count"></span></p>
+            <p>Nome (Internacional): <span id="country"></span></p>
+            <p>Nome Local: <span id="countryLocal"></span></p>
+            <p>Locale: <span id="locale"></span></p>
+            <ol id="listaFeriados">
+                 
+
+            </ol>
+        </div>
+
+     
+    </form>
+
+    <script>
+        const selecionarPais = () => {
+            ocultar();
+            const select = document.querySelector('select');
+            const paisSelecionado = select.value;
+            mostrarMensagem(paisSelecionado);
+            buscarDadosDoPaisSelecionado(paisSelecionado)
+        }
+
+        const mostrarMensagem = (pais) => {
+            //alert(`Você selecionou o país: ${pais}`);
+        }
+
+        const buscarDadosDoPaisSelecionado = async (pais) => {
+            const endereco = 'https://caldays.com/api/holidays/' + pais;
+            const resposta = await fetch(endereco)
+
+            if(resposta.status > 299) {
+                alert("Deu Erro")
+            } else {
+                const dados = await resposta.json()
+                console.log(dados.holidays)
+
+                atualizarDadosNaTela("code", dados.code )
+                atualizarDadosNaTela("year", dados.year )
+                atualizarDadosNaTela("count", dados.count )
+                atualizarDadosNaTela("country", dados.country )
+                atualizarDadosNaTela("countryLocal", dados.countryLocal )
+                atualizarDadosNaTela("locale", dados.locale )
+
+
+                const elementoPai = document.getElementById("listaFeriados")
+                elementoPai.innerText = ""
+                console.log(elementoPai)
+                for (let index = 0; index < dados.holidays.length; index++) {
+                    const element = dados.holidays[index];
+                    console.log("isso é um feriado")
+                    const novoFilho = document.createElement("li");
+                    novoFilho.innerHTML = "No dia de "+element.date+" teremos o feriado de "+element.name+"."
+                    elementoPai.appendChild(novoFilho)
+                }
+
+                // date: '2026-01-01', name: 'Ano Novo'}
+                exibir();
+            }
+        }
+
+        const ocultar = () => {
+            const elemento = document.getElementById("dadosFeriadoPais")
+            elemento.style.display = "none";
+        }
+
+        const exibir = () => {
+            const elemento = document.getElementById("dadosFeriadoPais")
+            if (elemento.style.display === "none") {
+                elemento.style.display = "block";
+            } else {
+                elemento.style.display = "none";
+            }
+        }
+
+
+        const aguardar =  (ms) =>  {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        const contat = () => {
+            for (let i = 0; i < 100000000; i++) {
+                console.log(i)
+                
+            }
+        }
+
+        const atualizarDadosNaTela = (id, novovalor) =>  {
+            const elementoHTML = document.getElementById(id);
+            elementoHTML.innerText = novovalor;
+        }
+
+        const feriadosDeTodosOsPaises = []
+
+        const carregarListaPaises = async () => {
+            const endereco = 'https://caldays.com/api/holidays';
+            const resposta = await fetch(endereco)
+
+            if(resposta.status > 299) {
+                alert("Deu Erro")
+            } else {
+                const dados = await resposta.json()
+                console.log(dados)
+
+                const seletorPai = document.getElementById("seletor")
+                
+                for (let index = 0; index < dados.countries.length; index++) {
+                    const pais = dados.countries[index];
+
+                    const novoFilhoOption = document.createElement("option");
+                    novoFilhoOption.value = pais.code;
+                    novoFilhoOption.innerText = pais.name
+                    seletorPai.appendChild(novoFilhoOption)
+                    
+                    const endereco = 'https://caldays.com/api/holidays/' + pais.code;
+                    const resposta = await fetch(endereco)
+                    feriados = await resposta.json()
+                    feriadosDeTodosOsPaises.push(feriados.holidays)
+                     
+                }
+            }
+
+
+     
+        }
+  
+  
+        const buscarNoChatGPT = async (pergunta) => {
+            const endereco = 'https://api.openai.com/v1/chat/completions';
+            const apiKey = process.env.OPENAI_API_KEY;
+            const resposta = await fetch(endereco, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{role: "user", content: pergunta}]
+                })
+            })
+
+            if(resposta.status > 299) {
+                alert("Deu Erro")
+            } else {
+                const dados = await resposta.json()
+                console.log(dados)
+                return dados.choices[0].message.content
+            }
+        }
+  </script>
+</body>
+</html>
+
+
+<!-- 
+
+
+: 
+"Argentina"
+countryLocal
+: 
+"Argentina"
+holidays
+: 
+Array(11)
+0
+: 
+{date: '2026-01-01', name: 'Año Nuevo'}
+1
+: 
+{date: '2026-02-16', name: 'Carnaval'}
+2
+: 
+{date: '2026-02-17', name: 'Carnaval'}
+3
+: 
+{date: '2026-03-24', name: 'Día de la Memoria'}
+4
+: 
+{date: '2026-04-02', name: 'Día del Veterano'}
+5
+: 
+{date: '2026-04-03', name: 'Viernes Santo'}
+6
+: 
+{date: '2026-05-01', name: 'Día del Trabajador'}
+7
+: 
+{date: '2026-05-25', name: 'Día de la Revolución'}
+8
+: 
+{date: '2026-07-09', name: 'Día de la Independencia'}
+9
+: 
+{date: '2026-12-08', name: 'Inmaculada Concepción'}
+10
+: 
+{date: '2026-12-25', name: 'Navidad'}
+length
+: 
+11
+[[Prototype]]
+: 
+Array(0)
+license
+: 
+"CC BY 4.0"
+locale
+: 
+"es-AR"
+year
+: 
+2026
+}
+
+-->

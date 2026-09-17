@@ -1,0 +1,149 @@
+### ========================================
+### Backend Node.js com JWT - Requisições HTTP
+### ========================================
+###
+### Para usar este arquivo:
+### 1. Instale a extensão "REST Client" no VS Code
+### 2. Clique em "Send Request" acima de cada requisição
+### 3. Os resultados aparecem em uma aba nova
+###
+### Variáveis:
+@baseUrl = http://localhost:3000
+@token = seu_token_aqui_depois_de_fazer_login
+
+### ========================================
+### 1. AUTENTICAÇÃO - REGISTRAR
+### ========================================
+### Criar novo usuário
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "nome": "Novo Usuário",
+  "email": "novo@email.com",
+  "senha": "senha123"
+}
+
+### ========================================
+### 2. AUTENTICAÇÃO - LOGIN
+### ========================================
+### Fazer login (use email e senha do usuário criado acima)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "novo@email.com",
+  "senha": "senha123"
+}
+
+### Resposta contém o token - copie e use na variável @token acima
+
+### ========================================
+### 3. AUTENTICAÇÃO - LOGIN COM ADMIN
+### ========================================
+### Fazer login com usuário pré-configurado
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@email.com",
+  "senha": "admin123"
+}
+
+### ========================================
+### 4. AUTENTICAÇÃO - OBTER DADOS DO USUÁRIO
+### ========================================
+### Obter dados do usuário autenticado
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### ========================================
+### 5. PRODUTOS - LISTAR TODOS
+### ========================================
+### Listar todos os produtos (sem autenticação)
+GET {{baseUrl}}/produtos
+
+### Com paginação
+GET {{baseUrl}}/produtos?pagina=1&limite=5
+
+### ========================================
+### 6. PRODUTOS - OBTER UM
+### ========================================
+### Obter um produto específico por ID
+GET {{baseUrl}}/produtos/1
+
+### ========================================
+### 7. PRODUTOS - CRIAR
+### ========================================
+### Criar novo produto (requer autenticação)
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Monitor 4K 27 polegadas",
+  "preco": 1500.00,
+  "categoria": "Monitores",
+  "estoque": 8,
+  "descricao": "Monitor 4K com 144Hz de refresh rate"
+}
+
+### ========================================
+### 8. PRODUTOS - ATUALIZAR
+### ========================================
+### Atualizar um produto (requer autenticação)
+PUT {{baseUrl}}/produtos/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "preco": 3200.00,
+  "estoque": 12
+}
+
+### ========================================
+### 9. PRODUTOS - DELETAR
+### ========================================
+### Deletar um produto (requer autenticação)
+DELETE {{baseUrl}}/produtos/3
+Authorization: Bearer {{token}}
+
+### ========================================
+### 10. PRODUTOS - FILTRAR POR CATEGORIA
+### ========================================
+### Filtrar produtos por categoria
+GET {{baseUrl}}/produtos/categoria/Eletrônicos
+
+### ========================================
+### 11. DOCUMENTAÇÃO
+### ========================================
+### Ver documentação completa da API
+GET {{baseUrl}}/docs
+
+### ========================================
+### DICAS
+### ========================================
+###
+### 1. Para extrair o token automaticamente:
+###    - Após fazer login (requisição #3), o token aparece no JSON
+###    - Copie o valor de "token"
+###    - Substitua "seu_token_aqui_depois_de_fazer_login" pela variável @token
+###
+### 2. Erros comuns:
+###    - 401: Token inválido ou expirado → Faça login novamente
+###    - 403: Sem permissão → Você não criou este produto
+###    - 404: Não encontrado → ID do produto não existe
+###    - 400: Dados inválidos → Verifique o formato do JSON
+###
+### 3. Fluxo recomendado:
+###    1. Faça login (#3) e copie o token
+###    2. Liste todos os produtos (#5)
+###    3. Crie um novo produto (#7)
+###    4. Veja o novo produto (#6)
+###    5. Atualize (#8) e delete (#9) conforme necessário
+###
+### 4. Para testar no Postman/Insomnia:
+###    - Crie uma variável de ambiente chamada "token"
+###    - Use {{token}} nos headers Authorization
+###    - Atualize a variável após fazer login
+###
