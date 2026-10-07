@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17
+    container_name: loja-db
+    environment:
+      POSTGRES_DB: loja
+      POSTGRES_USER: loja
+      POSTGRES_PASSWORD: loja123
+    ports:
+      - "5432:5432"
+    volumes:
+      - loja-dados:/var/lib/postgresql/data
+
+volumes:
+  loja-dados:

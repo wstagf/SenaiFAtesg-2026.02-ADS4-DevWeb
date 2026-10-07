@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/Projetos/Senai/2026-2/ADS4DevWEB/repositorio/Aula06/**)"
+    ],
+    "additionalDirectories": [
+      "d:\\Projetos\\Senai\\2026-2\\ADS4DevWEB\\repositorio\\Aula06"
+    ]
+  }
+}
