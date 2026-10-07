@@ -6,13 +6,13 @@ import jakarta.persistence.*;
 public class Categoria {
 
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 80)
     private String nome;
 
-    public Categoria() {
+    protected Categoria() {
     }
 
     public Categoria(String nome) {
