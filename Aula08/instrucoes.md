@@ -82,6 +82,12 @@ app.jwt.segredo=COLE_AQUI_O_VALOR_GERADO
 app.jwt.expiracao-minutos=60
 ```
 
+## Observação: o valor de app.jwt.segredo deve ser gerado com o comando
+
+```shell
+openssl rand -base64 32
+```
+
 ## Anotacoes extras
 
 -- Tutoriais de JWT para Spring Boot:
