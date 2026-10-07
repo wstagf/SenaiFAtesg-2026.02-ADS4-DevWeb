@@ -30,3 +30,12 @@ docker compose up -d
 docker compose ps
 docker exec -it loja-db psql -U loja -d loja -c "select version();"
 ```
+
+
+
+https://start.spring.io/
+
+
+https://medium.com/@victoronu/implementing-jwt-authentication-in-a-simple-spring-boot-application-with-java-b3135dbdb17b
+
+
