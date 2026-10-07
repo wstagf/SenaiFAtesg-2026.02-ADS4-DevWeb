@@ -88,6 +88,93 @@ app.jwt.expiracao-minutos=60
 openssl rand -base64 32
 ```
 
+## Passo 4: entidades com chave estrangeira
+
+A chave estrangeira fica em produtos.categoria_id e é criada pela dupla @ManyToOne + @JoinColumn na entidade Produto.
+
+categoria/Categoria.java:
+
+```java
+package com.exemplo.loja.categoria;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "categorias")
+public class Categoria {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 80)
+    private String nome;
+
+    protected Categoria() { }
+
+    public Categoria(String nome) { this.nome = nome; }
+
+    public Long getId() { return id; }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+}
+```
+
+```java
+produto/Produto.java:
+
+
+package com.exemplo.loja.produto;
+
+import com.exemplo.loja.categoria.Categoria;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "produtos")
+public class Produto {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 120)
+    private String nome;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal preco;
+
+    // Chave estrangeira: coluna categoria_id -> categorias.id
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
+
+    protected Produto() { }
+
+    public Produto(String nome, BigDecimal preco, Categoria categoria) {
+        this.nome = nome;
+        this.preco = preco;
+        this.categoria = categoria;
+    }
+
+    public Long getId() { return id; }
+    public String getNome() { return nome; }
+    public BigDecimal getPreco() { return preco; }
+    public Categoria getCategoria() { return categoria; }
+
+    public void atualizar(String nome, BigDecimal preco, Categoria categoria) {
+        this.nome = nome;
+        this.preco = preco;
+        this.categoria = categoria;
+    }
+}
+
+```
+
+O construtor vazio protected é exigência do JPA. FetchType.LAZY evita carregar a categoria em toda consulta de produto; por isso a conversão para DTO acontece dentro de uma transação, no Passo 5.
+
+
+
 ## Anotacoes extras
 
 -- Tutoriais de JWT para Spring Boot:
