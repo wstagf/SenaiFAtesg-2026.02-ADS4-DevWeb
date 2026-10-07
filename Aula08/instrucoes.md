@@ -33,9 +33,58 @@ docker exec -it loja-db psql -U loja -d loja -c "select version();"
 
 
 
-https://start.spring.io/
+## Passo 2: criar o projeto Spring Boot
 
+Gere o projeto em start.spring.io com estas opções:
+• Project: Maven. Language: Java. Java: 21.
+• Group: com.fatesg.devweb.aula08. Artifact: loja.
+• Dependencies: Spring Web, Spring Data JPA, PostgreSQL Driver, Spring Security, Validation.
+Descompacte o zip na pasta onde está o compose.yaml. Depois, adicione a biblioteca de JWT dentro de <dependencies> no pom.xml:
 
+```xml
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.12.6</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.12.6</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.12.6</version>
+    <scope>runtime</scope>
+</dependency>
+```
+As demais dependências já vêm com a versão certa pelo Initializr, por isso não é preciso escrever o pom.xml à mão.
+
+## Passo 3: configurar o banco de dados
+Em src/main/resources/application.properties:
+spring.application.name=loja
+
+``` java
+# Banco (mesmos valores do compose.yaml)
+spring.datasource.url=jdbc:postgresql://localhost:5432/loja
+spring.datasource.username=loja
+spring.datasource.password=loja123
+
+# JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.open-in-view=false
+
+# JWT
+app.jwt.segredo=COLE_AQUI_O_VALOR_GERADO
+app.jwt.expiracao-minutos=60
+```
+
+## Anotacoes extras
+
+-- Tutoriais de JWT para Spring Boot:
 https://medium.com/@victoronu/implementing-jwt-authentication-in-a-simple-spring-boot-application-with-java-b3135dbdb17b
 
 
