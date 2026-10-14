@@ -1,0 +1,1 @@
+Setup guiado do ambiente; Demonstração MVC; Criação de projeto inicial; Exercícios de roteamento; Prática com 3 rotas GET 
