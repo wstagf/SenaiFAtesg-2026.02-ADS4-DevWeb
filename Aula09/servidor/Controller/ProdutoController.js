@@ -40,3 +40,5 @@ class ProdutoControl {
         return false;
     }
 }
+
+module.exports = ProdutoControl;
